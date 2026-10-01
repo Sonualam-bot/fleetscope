@@ -22,6 +22,7 @@ function vesselCoordinate(vessel: VesselState): number[] {
 
 function createVesselFeature(vessel: VesselState): Feature<Point> {
   const feature = new Feature({ geometry: new Point(vesselCoordinate(vessel)) });
+  feature.set("vesselId", vessel.id);
 
   feature.setStyle(
     new Style({
