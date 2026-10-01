@@ -1,9 +1,7 @@
+import MapView from './map/MapView'
+
 function App() {
-  return (
-    <div className="flex h-screen w-screen items-center justify-center">
-      <p className="text-slate-500">Fleetscope</p>
-    </div>
-  )
+  return <MapView />
 }
 
 export default App
