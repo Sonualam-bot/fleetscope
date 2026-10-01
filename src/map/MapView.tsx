@@ -7,9 +7,11 @@ import { fromLonLat } from "ol/proj";
 import "ol/ol.css";
 import { useMapPointerCoordinate } from "./useMapPointerCoordinate";
 import CoordinateReadout from "./CoordinateReadout";
+import { createVesselLayer } from "./layers/vesselLayer";
 
-const INITIAL_CENTER_LON_LAT: [number, number] = [96.0997, 27.5451];
-const INITIAL_ZOOM_LEVEL = 10;
+// Centered on the Singapore Strait, where the simulated fleet patrols.
+const INITIAL_CENTER_LON_LAT: [number, number] = [103.85, 1.2];
+const INITIAL_ZOOM_LEVEL = 11;
 
 function MapView() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -20,7 +22,7 @@ function MapView() {
 
     const mapInstance = new Map({
       target: mapContainerRef.current,
-      layers: [new TileLayer({ source: new OSM() })],
+      layers: [new TileLayer({ source: new OSM() }), createVesselLayer()],
       view: new View({
         center: fromLonLat(INITIAL_CENTER_LON_LAT),
         zoom: INITIAL_ZOOM_LEVEL,
