@@ -2,14 +2,15 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
-import { Style, RegularShape, Fill, Stroke } from "ol/style";
+import { Style, Icon } from "ol/style";
 import { fromLonLat } from "ol/proj";
 import { store } from "../../store/store";
 import type { VesselState } from "../../store/fleetSlice";
+import { createBoatIconDataUri } from "./boatIcon";
 
 const VESSEL_FILL_COLOR = "#2563eb";
 const VESSEL_STROKE_COLOR = "#ffffff";
-const VESSEL_MARKER_RADIUS_PX = 8;
+const VESSEL_ICON_SRC = createBoatIconDataUri(VESSEL_FILL_COLOR, VESSEL_STROKE_COLOR);
 
 function headingDegreesToRotationRadians(headingDegrees: number): number {
   return (headingDegrees * Math.PI) / 180;
@@ -24,11 +25,9 @@ function createVesselFeature(vessel: VesselState): Feature<Point> {
 
   feature.setStyle(
     new Style({
-      image: new RegularShape({
-        points: 3,
-        radius: VESSEL_MARKER_RADIUS_PX,
-        fill: new Fill({ color: VESSEL_FILL_COLOR }),
-        stroke: new Stroke({ color: VESSEL_STROKE_COLOR, width: 1.5 }),
+      image: new Icon({
+        src: VESSEL_ICON_SRC,
+        anchor: [0.5, 0.5],
         rotation: headingDegreesToRotationRadians(vessel.headingDegrees),
       }),
     }),
@@ -42,11 +41,16 @@ function updateVesselFeature(feature: Feature<Point>, vessel: VesselState): void
   feature.getGeometry()?.setCoordinates(vesselCoordinate(vessel));
 
   const markerImage = feature.getStyle();
-  if (markerImage instanceof Style && markerImage.getImage() instanceof RegularShape) {
-    (markerImage.getImage() as RegularShape).setRotation(
+  if (markerImage instanceof Style && markerImage.getImage() instanceof Icon) {
+    (markerImage.getImage() as Icon).setRotation(
       headingDegreesToRotationRadians(vessel.headingDegrees),
     );
   }
+}
+
+export interface VesselLayer {
+  layer: VectorLayer<VectorSource>;
+  dispose: () => void;
 }
 
 /**
@@ -55,7 +59,7 @@ function updateVesselFeature(feature: Feature<Point>, vessel: VesselState): void
  * updates mutate existing OL features in place on every tick, rather than
  * flowing through a React re-render.
  */
-export function createVesselLayer(): VectorLayer<VectorSource> {
+export function createVesselLayer(): VesselLayer {
   const vectorSource = new VectorSource();
   const featureByVesselId = new Map<string, Feature<Point>>();
 
@@ -75,8 +79,10 @@ export function createVesselLayer(): VectorLayer<VectorSource> {
     }
   }
 
-  store.subscribe(syncFeaturesWithStore);
+  const unsubscribeFromStore = store.subscribe(syncFeaturesWithStore);
   syncFeaturesWithStore(); // paint whatever state already exists, don't wait for the next tick
 
-  return new VectorLayer({ source: vectorSource });
+  const layer = new VectorLayer({ source: vectorSource });
+
+  return { layer, dispose: unsubscribeFromStore };
 }
