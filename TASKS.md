@@ -8,8 +8,8 @@ Mirrors the phased plan. Check items off as they're completed.
 - [x] Live pointer coordinate readout
 - [x] Simulated fleet: vessel motion math, telemetry source, Redux store, vessel layer
 - [x] Boat icon markers (rotated by heading)
-- [ ] Per-vessel track trails (growing LineString)
-- [ ] Click-to-popup (name/speed/heading)
+- [x] Per-vessel track trails (fading, not fixed-length)
+- [x] Click-to-popup (name/speed/heading, corner-aware placement)
 - [ ] Route drawing tool, assignable to a vessel
 - [ ] Distance measuring tool
 - [ ] Original visual identity pass (palette/branding beyond default blue)
