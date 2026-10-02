@@ -9,19 +9,30 @@ export interface FeatureClickSelection {
   coordinate: number[];
 }
 
+export interface FeatureClickState {
+  selection: FeatureClickSelection | null;
+  clearSelection: () => void;
+}
+
 /**
  * Tracks which feature on a specific layer was last clicked, along with the
  * click's map coordinate. Resets to null whenever the most recent click
  * missed every feature on that layer (open water, or a different layer).
+ *
+ * `enabled` lets a caller temporarily suppress click handling entirely --
+ * e.g. while a different map tool (like route drawing) is actively
+ * consuming clicks, so a click meant for that tool doesn't also reselect
+ * a feature underneath it.
  */
 export function useMapFeatureClick(
   map: Map | null,
   layer: BaseLayer | null,
-): FeatureClickSelection | null {
+  enabled = true,
+): FeatureClickState {
   const [selection, setSelection] = useState<FeatureClickSelection | null>(null);
 
   useEffect(() => {
-    if (!map || !layer) return;
+    if (!map || !layer || !enabled) return;
     const currentMap = map;
     const currentLayer = layer;
 
@@ -41,7 +52,11 @@ export function useMapFeatureClick(
     return () => {
       currentMap.un("click", handleClick);
     };
-  }, [map, layer]);
+  }, [map, layer, enabled]);
 
-  return selection;
+  function clearSelection(): void {
+    setSelection(null);
+  }
+
+  return { selection, clearSelection };
 }

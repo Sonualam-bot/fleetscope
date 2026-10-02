@@ -83,7 +83,9 @@ export function createVesselLayer(): VesselLayer {
   const unsubscribeFromStore = store.subscribe(syncFeaturesWithStore);
   syncFeaturesWithStore(); // paint whatever state already exists, don't wait for the next tick
 
-  const layer = new VectorLayer({ source: vectorSource });
+  // Explicit zIndex, not insertion order, so vessels stay on top of tracks
+  // and the route sketch regardless of which order those layers are added.
+  const layer = new VectorLayer({ source: vectorSource, zIndex: 2 });
 
   return { layer, dispose: unsubscribeFromStore };
 }

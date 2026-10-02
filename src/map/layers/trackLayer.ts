@@ -106,7 +106,7 @@ export function createTrackLayer(): TrackLayer {
   const fadeIntervalId = setInterval(fadeAndExpireSegments, FADE_UPDATE_INTERVAL_MS);
   syncTracksWithStore();
 
-  const layer = new VectorLayer({ source: vectorSource });
+  const layer = new VectorLayer({ source: vectorSource, zIndex: 1 });
 
   return {
     layer,

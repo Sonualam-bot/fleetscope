@@ -14,6 +14,8 @@ import ResolutionIndicator from "./ResolutionIndicator";
 import { createVesselLayer } from "./layers/vesselLayer";
 import { createTrackLayer } from "./layers/trackLayer";
 import VesselPopup from "./VesselPopup";
+import { useRouteDrawingTool } from "./useRouteDrawingTool";
+import DrawingBanner from "./DrawingBanner";
 
 // Centered on the Singapore Strait, where the simulated fleet patrols.
 const INITIAL_CENTER_LON_LAT: [number, number] = [103.85, 1.2];
@@ -55,13 +57,23 @@ function MapView() {
 
   const pointerCoordinate = useMapPointerCoordinate(map);
   const resolutionMetersPerPixel = useMapResolution(map);
+  const routeDrawingTool = useRouteDrawingTool(map);
 
   return (
     <div className="relative h-screen w-screen">
       <div ref={mapContainerRef} className="h-full w-full" />
       <CoordinateReadout coordinate={pointerCoordinate} />
       <ResolutionIndicator resolutionMetersPerPixel={resolutionMetersPerPixel} />
-      <VesselPopup map={map} vesselLayer={vesselVectorLayer} />
+      <VesselPopup
+        map={map}
+        vesselLayer={vesselVectorLayer}
+        isSelectionEnabled={!routeDrawingTool.isDrawing}
+        onDrawRoute={routeDrawingTool.startDrawingRouteFor}
+      />
+      <DrawingBanner
+        isDrawing={routeDrawingTool.isDrawing}
+        onCancel={routeDrawingTool.cancelDrawing}
+      />
     </div>
   );
 }

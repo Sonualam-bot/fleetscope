@@ -1,4 +1,4 @@
-import { advanceVessel, type VesselMotionState } from "./vesselMotion";
+import { advanceVessel, type LonLat, type VesselMotionState } from "./vesselMotion";
 import { SEED_FLEET } from "./seedFleet";
 
 export interface VesselTelemetry {
@@ -19,6 +19,8 @@ export interface VesselTelemetry {
  */
 export interface TelemetrySource {
   subscribe(onTick: (updates: VesselTelemetry[]) => void): () => void;
+  /** Replaces a vessel's route with new waypoints; it heads to the first one next. */
+  assignRoute(vesselId: string, waypoints: LonLat[]): void;
 }
 
 const TICK_INTERVAL_MS = 500;
@@ -43,6 +45,21 @@ export class SimulatedTelemetrySource implements TelemetrySource {
   private ensureTicking(): void {
     if (this.intervalId !== null) return;
     this.intervalId = setInterval(() => this.tick(), TICK_INTERVAL_MS);
+  }
+
+  assignRoute(vesselId: string, waypoints: LonLat[]): void {
+    const entry = this.vesselMotionById.get(vesselId);
+    if (!entry || waypoints.length === 0) return;
+
+    // The vessel's current position becomes waypoints[0] so the ping-pong
+    // route math (which expects "already at index 0") stays correct; the
+    // vessel then heads toward the first drawn point at index 1.
+    entry.motion = {
+      ...entry.motion,
+      waypoints: [entry.motion.position, ...waypoints],
+      currentWaypointIndex: 1,
+      waypointStepDirection: 1,
+    };
   }
 
   private stopTicking(): void {

@@ -11,6 +11,8 @@ import { useMapOverlay, type OverlayPlacement } from "./useMapOverlay";
 interface VesselPopupProps {
   map: Map | null;
   vesselLayer: VectorLayer<VectorSource> | null;
+  isSelectionEnabled: boolean;
+  onDrawRoute: (vesselId: string) => void;
 }
 
 /**
@@ -44,8 +46,8 @@ function getArrowPositionClasses(placement: OverlayPlacement): string {
   return `${verticalClass} ${horizontalClass}`;
 }
 
-function VesselPopup({ map, vesselLayer }: VesselPopupProps) {
-  const selection = useMapFeatureClick(map, vesselLayer);
+function VesselPopup({ map, vesselLayer, isSelectionEnabled, onDrawRoute }: VesselPopupProps) {
+  const { selection, clearSelection } = useMapFeatureClick(map, vesselLayer, isSelectionEnabled);
   const vesselId = selection?.feature.get("vesselId") as string | undefined;
   const vessel = useAppSelector((state) =>
     vesselId ? (state.fleet.vesselsById[vesselId] ?? null) : null,
@@ -71,6 +73,12 @@ function VesselPopup({ map, vesselLayer }: VesselPopupProps) {
   }, [vesselId]);
 
   if (!overlayElement || !vessel) return null;
+  const selectedVessel = vessel;
+
+  function handleDrawRouteClick(): void {
+    onDrawRoute(selectedVessel.id);
+    clearSelection();
+  }
 
   return createPortal(
     <div
@@ -89,6 +97,13 @@ function VesselPopup({ map, vesselLayer }: VesselPopupProps) {
           <dd>{vessel.speedKnots.toFixed(1)} kn</dd>
         </div>
       </dl>
+      <button
+        type="button"
+        onClick={handleDrawRouteClick}
+        className="mt-3 w-full rounded-md bg-white/10 px-2 py-1.5 text-xs font-medium transition-colors hover:bg-white/20"
+      >
+        Draw Route
+      </button>
       <div
         className={`absolute h-2.5 w-2.5 rotate-45 bg-black/70 ${getArrowPositionClasses(placement)}`}
       />
