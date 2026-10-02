@@ -10,7 +10,7 @@ Mirrors the phased plan. Check items off as they're completed.
 - [x] Boat icon markers (rotated by heading)
 - [x] Per-vessel track trails (fading, not fixed-length)
 - [x] Click-to-popup (name/speed/heading, corner-aware placement)
-- [ ] Route drawing tool, assignable to a vessel
+- [x] Route drawing tool, assignable to a vessel
 - [ ] Distance measuring tool
 - [ ] Original visual identity pass (palette/branding beyond default blue)
 - [ ] Deploy to Vercel
